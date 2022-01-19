@@ -1,0 +1,13 @@
+.non-scroll-list {
+    flex-flow: column wrap;
+    place-content: flex-start;
+    align-items: flex-start;
+    display: flex;
+
+    height: 100vh;
+    width: 100vh;
+}
+
+.on-max-height {
+    height: 100%;
+}

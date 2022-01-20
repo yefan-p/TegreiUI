@@ -45,6 +45,16 @@ $controller = new SelectCategoryController();
                     <div class="col d-flex flex-column">
                         <p class="my-2"><?php echo $controller->GetFullName() ?></p>
                         <input class="my-2" type="text" value="<?php echo $controller->GetShortName(); ?>">
+                        <?php if($controller->IsMapAlreadyExists())
+                        {?>
+                            <div class="alert alert-danger" role="alert">Map already exists!<br>
+                                <?php
+                                echo 'Id: ' . $controller->GetExistsMaps()[0]['Id'];
+                                echo '; Map: ' . $controller->GetExistsMaps()[0]['Map'] . ';';
+                                ?>
+                            </div>
+                        <?php
+                        }?>
                         <button class="btn btn-success" type="submit">Сохранить</button>
                         <div class="my-2">
                             <?php echo $controller->GetDescription() ?>

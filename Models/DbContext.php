@@ -38,12 +38,28 @@ class DbContext
         return $sqlState->fetchAll();
     }
 
-    public function GetUnifyItem(): array
+    public function GetUnifyItem(string $id): UnifyItem
     {
-        $sql = 'SELECT * FROM UnifyItems WHERE Id=:Id';
+        $sql = 'SELECT * FROM UnifyItems WHERE Id = :Id';
         $sqlState = $this->dbContext->prepare($sql);
-        if (isset($_GET['unifyId']))
-            $sqlState->execute([':Id' => $_GET['unifyId']]);
+        $sqlState->execute([':Id' => $id]);
+
+        $result = $sqlState->fetchAll();
+
+        $item = new UnifyItem();
+        $item->Id = $result[0]['Id'];
+        $item->FullProgramName = $result[0]['Name'];
+        $item->ShortProgramName = (string)preg_replace('/.\d.*/', '', $item->FullProgramName);
+        $item->Description = $result[0]['Description'];
+
+        return $item;
+    }
+
+    public function CheckExistsMap(string $map): array
+    {
+        $sql = 'SELECT * FROM SoftCategoryMaps WHERE Map LIKE  :Map + \'%\'';
+        $sqlState = $this->dbContext->prepare($sql);
+        $sqlState->execute([':Map' => $map]);
 
         return $sqlState->fetchAll();
     }

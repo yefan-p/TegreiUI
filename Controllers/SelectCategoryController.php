@@ -3,70 +3,61 @@
 namespace Controllers;
 
 use Models\DbContext;
+use Models\UnifyItem;
 
 class SelectCategoryController
 {
-    private DbContext $db;
-
     private array $categories;
     private array $nonCategoriesProgram;
-    private array $unifyItem;
-
-    private string $fullProgramName;
-    private string $shortProgramName;
-    private string $description;
+    private array $existsMaps;
+    private UnifyItem $unifyItem;
 
     public function __construct()
     {
-        $this->db = new DbContext();
+        $db = new DbContext();
+        $this->unifyItem = new UnifyItem();
+        $this->categories = $db->GetCategories();
+        $this->nonCategoriesProgram = $db->GetNonCategoriesPrograms();
 
-        $this->categories = $this->db->GetCategories();
-        $this->nonCategoriesProgram = $this->db->GetNonCategoriesPrograms();
-        $this->unifyItem = $this->db->GetUnifyItem();
-
-        if ((isset($this->unifyItem[0]['Name'])))
+        if (isset($_GET['unifyId']))
         {
-            $this->fullProgramName = $this->unifyItem[0]['Name'];
-            $this->shortProgramName = (string)preg_replace('/.\d.*/', '', $this->fullProgramName);
-        }
-        else
-        {
-            $this->fullProgramName = '';
-            $this->shortProgramName = '';
-        }
-
-        if (isset($this->unifyItem[0]['Description']))
-        {
-            $this->description = $this->unifyItem[0]['Description'];
-        }
-        else
-        {
-            $this->description = '';
+            $this->unifyItem = $db->GetUnifyItem($_GET['unifyId']);
+            $this->existsMaps = $db->CheckExistsMap($this->unifyItem->ShortProgramName);
         }
     }
 
-    public function GetCategories() : array
+    public function GetCategories(): array
     {
         return $this->categories;
     }
 
-    public function GetNonCategoriesProgram() : array
+    public function GetNonCategoriesProgram(): array
     {
         return $this->nonCategoriesProgram;
     }
 
-    public function GetFullName() : string
+    public function GetExistsMaps(): array
     {
-        return $this->fullProgramName;
+        return $this->existsMaps;
     }
 
-    public function GetShortName() : string
+    public function GetFullName(): string
     {
-        return $this->shortProgramName;
+        return $this->unifyItem->FullProgramName;
     }
 
-    public function GetDescription() : string
+    public function GetShortName(): string
     {
-        return $this->description;
+        return $this->unifyItem->ShortProgramName;
+    }
+
+    public function GetDescription(): string
+    {
+        return $this->unifyItem->Description;
+    }
+
+    public function IsMapAlreadyExists(): bool
+    {
+        return !empty($this->existsMaps);
     }
 }

@@ -27,11 +27,16 @@ class DbContext
     public function GetNonCategoriesPrograms(): array
     {
         $sql =
-            'SELECT UnifyItems.Id, Name
-            FROM SoftResults
-            INNER JOIN UnifyItems ON UnifyItems.Id = SoftResults.UnifyItemId
-            WHERE IsCategoryMapExists = 0 AND IsFileAlreadyExists = 0
-            ORDER BY SoftResults.Created DESC';
+            'SELECT ui.Id, Name
+             FROM SoftResults sr
+             INNER JOIN UnifyItems ui ON ui.Id = sr.UnifyItemId
+             WHERE IsCategoryMapExists = 0 
+                AND IsFileAlreadyExists = 0
+                AND ui.Id NOT IN (
+                    SELECT srs.UnifyItemId
+                    FROM SoftResults srs
+                    WHERE srs.UnifyItemId = ui.Id AND IsCategoryMapExists = 1)
+             ORDER BY sr.Created DESC';
         $sqlState = $this->dbContext->prepare($sql);
         $sqlState->execute();
 
@@ -57,10 +62,49 @@ class DbContext
 
     public function CheckExistsMap(string $map): array
     {
-        $sql = 'SELECT * FROM SoftCategoryMaps WHERE Map LIKE  :Map + \'%\'';
+        $sql = 'SELECT * FROM SoftCategoryMaps WHERE Map LIKE :Map + \'%\'';
         $sqlState = $this->dbContext->prepare($sql);
         $sqlState->execute([':Map' => $map]);
 
         return $sqlState->fetchAll();
+    }
+
+    public function SaveNewMap(string $map): void
+    {
+        $sql = 'INSERT INTO SoftCategoryMaps (Map) VALUES (:Map)';
+        $sqlState = $this->dbContext->prepare($sql);
+        $sqlState->execute([':Map' => $map]);
+    }
+
+    public function SaveNewCategory(int $mapId, int $categoryId): void
+    {
+        $sql =
+            'INSERT INTO SoftCategorySoftCategoryMap (SoftCategoryId, SoftCategoryMapId)
+            VALUES (:CategoryId, :MapId)';
+        $sqlState = $this->dbContext->prepare($sql);
+        $sqlState->execute([':MapId' => $mapId, ':CategoryId' => $categoryId]);
+    }
+
+    public function MarkCategoryExists(string $map): void
+    {
+        $sql =
+            'UPDATE SoftResults
+            SET IsCategoryMapExists = 1
+            WHERE IsCategoryMapExists = 0 
+	        AND UnifyItemId IN 
+		        (SELECT Id
+		        FROM UnifyItems
+		        WHERE Name LIKE :Map + \'%\')';
+        $sqlState = $this->dbContext->prepare($sql);
+        $sqlState->execute([':Map' => $map]);
+    }
+
+    public function GetCategoryMapId(string $map): int
+    {
+        $sql = 'SELECT TOP 1 Id FROM SoftCategoryMaps WHERE Map LIKE :Map + \'%\'';
+        $sqlState = $this->dbContext->prepare($sql);
+        $sqlState->execute([':Map' => $map]);
+
+        return $sqlState->fetchAll()[0]['Id'];
     }
 }

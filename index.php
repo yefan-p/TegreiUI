@@ -30,7 +30,7 @@ $controller = new SelectCategoryController();
             foreach ($controller->GetNonCategoriesProgram() as $program)
             {
                 ?>
-                <form class="d-flex flex-column my-2" action="/index.php" method="get">
+                <form class="d-flex flex-column my-2" action="/tegrei/index.php" method="get">
                     <button class="btn btn-primary" type="submit" name="unifyId" value="<?php echo $program[0] ?>">
                         <?php echo $program[1] ?>
                     </button>
@@ -40,11 +40,11 @@ $controller = new SelectCategoryController();
             ?>
         </div>
         <div class="col">
-            <form action="/save_category.php" method="post">
+            <form action="/tegrei/save_category.php" method="post">
                 <div class="row">
                     <div class="col d-flex flex-column">
                         <p class="my-2"><?php echo $controller->GetFullName() ?></p>
-                        <input class="my-2" type="text" value="<?php echo $controller->GetShortName(); ?>">
+                        <input class="my-2" type="text" name="newMap" value="<?php echo $controller->GetShortName(); ?>">
                         <?php if($controller->IsMapAlreadyExists())
                         {?>
                             <div class="alert alert-danger" role="alert">Map already exists!<br>
@@ -55,7 +55,7 @@ $controller = new SelectCategoryController();
                             </div>
                         <?php
                         }?>
-                        <button class="btn btn-success" type="submit">Сохранить</button>
+                        <button class="btn btn-success my-2" type="submit">Сохранить</button>
                         <div class="my-2">
                             <?php echo $controller->GetDescription() ?>
                         </div>
@@ -68,7 +68,7 @@ $controller = new SelectCategoryController();
                         foreach ($controller->GetCategories() as $category) {
                             ?>
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="<?php echo $category['Id'] ?>">
+                                <input class="form-check-input" type="checkbox" name="<?php echo $category['Id'] ?>">
                                 <label class="form-check-label" for="<?php echo $category['Id'] ?>">
                                     <?php
                                     if ($category['Name'] == 'OC'
